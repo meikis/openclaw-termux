@@ -39,13 +39,13 @@ class GatewayService {
     await prefs.init();
     final savedUrl = prefs.dashboardUrl;
 
+    // Always ensure directories and resolv.conf exist on app open.
+    // Android may clear the files directory during an app update (#40).
+    try { await NativeBridge.setupDirs(); } catch (_) {}
+    try { await NativeBridge.writeResolv(); } catch (_) {}
+
     final alreadyRunning = await NativeBridge.isGatewayRunning();
     if (alreadyRunning) {
-      // Ensure directories exist — Android may have cleared them after
-      // an upgrade or while the app was in the background (#40).
-      try { await NativeBridge.setupDirs(); } catch (_) {}
-      // Refresh resolv.conf so DNS keeps working.
-      try { await NativeBridge.writeResolv(); } catch (_) {}
       // Write allowCommands config so the next gateway restart picks it up,
       // and in case the running gateway supports config hot-reload.
       await _writeNodeAllowConfig();
