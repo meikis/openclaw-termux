@@ -421,8 +421,13 @@ class BootstrapManager(
             "force-unsafe-io\n" +
             "no-debsig\n" +
             "force-overwrite\n" +
-            "force-depends\n"
+            "force-depends\n" +
+            "force-statoverride-add\n"
         )
+
+        // 2b. Clear stale stat-overrides that cause dpkg failures in proot
+        val statOverride = File("$rootfsDir/var/lib/dpkg/statoverride")
+        if (statOverride.exists()) statOverride.writeText("")
 
         // 3. Ensure essential directories exist
         // mkdir syscall is broken inside proot on Android 10+.
